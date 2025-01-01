@@ -28,6 +28,29 @@ const MOODS = {
   AWFUL: { label: 'Awful', color: '#FF4444', emoji: '😢' },   // Crying face
 };
 
+const MOOD_PLACEHOLDERS = {
+  GREAT: [
+    "What made your day amazing? Highlight the best moments!"
+  ],
+  GOOD: [
+    "What made your day good? Celebrate the wins!",
+    "What brought a smile to your face today? Anything worth remembering?",
+    "What went well today? Who or what contributed to your happiness?"
+  ],
+  OKAY: [
+    "What was a quiet win today? Anything worth noting?"
+  ],
+  BAD: [
+    "What made today challenging? It's okay to express it here."
+  ],
+  AWFUL: [
+    "What made today tough? Writing can help process it.",
+    "What didn't go as planned? It's okay to let it out here.",
+    "What's on your mind? Remember, even hard days pass.",
+    "What happened today? Reflecting might bring some clarity."
+  ]
+};
+
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 type DayData = {
@@ -53,6 +76,12 @@ export function YearGrid() {
         useNativeDriver: true,
       }).start();
     }
+  };
+
+  const getRandomPlaceholder = (mood: string) => {
+    const placeholders = MOOD_PLACEHOLDERS[mood];
+    const randomIndex = Math.floor(Math.random() * placeholders.length);
+    return placeholders[randomIndex];
   };
 
   const handleMoodSelect = (mood: string) => {
@@ -191,7 +220,7 @@ export function YearGrid() {
             </ThemedText>
             <TextInput
               style={styles.noteInput}
-              placeholder="Add notes for this day..."
+              placeholder={selectedMood ? getRandomPlaceholder(selectedMood) : "Add notes for this day..."}
               value={currentNote}
               onChangeText={setCurrentNote}
               multiline
