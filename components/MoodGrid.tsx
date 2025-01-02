@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, Pressable, Animated, Dimensions, TextInput, Keyboard, KeyboardAvoidingView, Platform } from 'react-native';
 import { ThemedText } from './ThemedText';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const MONTHS = [
   'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
@@ -21,11 +22,11 @@ const isValidDay = (month: keyof typeof MONTH_DAYS, day: number) => {
 };
 
 const MOODS = {
-  GREAT: { label: 'Great', color: '#7CBD1E', emoji: '🤩' },  // Star eyes emoji
-  GOOD: { label: 'Good', color: '#B3D89C', emoji: '😊' },    // Smiling face
-  OKAY: { label: 'Okay', color: '#FFD700', emoji: '😐' },    // Neutral face
-  BAD: { label: 'Bad', color: '#FF9999', emoji: '😞' },      // Sad face
-  AWFUL: { label: 'Awful', color: '#FF4444', emoji: '😢' },   // Crying face
+  GREAT: { label: 'Great', color: '#7CBD1E', emoji: '🤩' },
+  GOOD: { label: 'Good', color: '#B3D89C', emoji: '😊' },
+  OKAY: { label: 'Okay', color: '#FFD700', emoji: '😐' },
+  BAD: { label: 'Bad', color: '#FF9999', emoji: '😞' },
+  AWFUL: { label: 'Awful', color: '#FF4444', emoji: '😢' },
 };
 
 const MOOD_PLACEHOLDERS = {
@@ -113,6 +114,29 @@ export function MoodGrid() {
     };
   }, []);
 
+  useEffect(() => {
+    loadMoodData();
+  }, []);
+
+  const loadMoodData = async () => {
+    try {
+      const storedData = await AsyncStorage.getItem('moodData');
+      if (storedData) {
+        setMoodData(JSON.parse(storedData));
+      }
+    } catch (error) {
+      console.error('Error loading mood data:', error);
+    }
+  };
+
+  const saveMoodData = async (newMoodData: typeof moodData) => {
+    try {
+      await AsyncStorage.setItem('moodData', JSON.stringify(newMoodData));
+    } catch (error) {
+      console.error('Error saving mood data:', error);
+    }
+  };
+
   const handleCellPress = (month: Month, day: number) => {
     if (isValidDay(month, day)) {
       setSelectedCell({ month, day });
@@ -155,13 +179,15 @@ export function MoodGrid() {
     if (selectedCell) {
       setSelectedMood(mood);
       const key = `${selectedCell.month}-${selectedCell.day}`;
-      setMoodData({ 
+      const newMoodData = { 
         ...moodData, 
         [key]: { 
           mood,
           note: currentNote 
         } 
-      });
+      };
+      setMoodData(newMoodData);
+      saveMoodData(newMoodData);
       triggerAnimation(key);
     }
   };
@@ -181,15 +207,25 @@ export function MoodGrid() {
   const handleSave = () => {
     if (selectedCell && selectedMood) {
       const key = `${selectedCell.month}-${selectedCell.day}`;
-      setMoodData({
+      const newMoodData = {
         ...moodData,
         [key]: {
           mood: selectedMood,
           note: currentNote
         }
-      });
+      };
+      setMoodData(newMoodData);
+      saveMoodData(newMoodData);
       handleClose();
     }
+  };
+
+  const handleReset = async (key: string) => {
+    const newMoodData = { ...moodData };
+    delete newMoodData[key];
+    setMoodData(newMoodData);
+    await saveMoodData(newMoodData);
+    handleClose();
   };
 
   const renderPixel = (month: Month, dayIndex: number) => {
@@ -285,19 +321,16 @@ export function MoodGrid() {
             <View style={styles.moodSelectorHandle} />
             {!selectedMood && (
               <Pressable 
-              onPress={() => {
-                if (selectedCell) {
-                  const key = `${selectedCell.month}-${selectedCell.day}`;
-                  const newMoodData = { ...moodData };
-                  delete newMoodData[key];
-                  setMoodData(newMoodData);
-                  handleClose();
-                }
-              }}
-              style={styles.resetButton}
-            >
-              <Ionicons name="refresh" size={24} color="#666" />
-            </Pressable>
+                onPress={async () => {
+                  if (selectedCell) {
+                    const key = `${selectedCell.month}-${selectedCell.day}`;
+                    await handleReset(key);
+                  }
+                }}
+                style={styles.resetButton}
+              >
+                <Ionicons name="refresh" size={24} color="#666" />
+              </Pressable>
             )}
             {selectedMood && (
               <Pressable 
@@ -407,7 +440,6 @@ const styles = StyleSheet.create({
   },
   moodSelector: {
     padding: 20,
-    paddingBottom: 40,
     backgroundColor: '#fff',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,

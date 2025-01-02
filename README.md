@@ -58,3 +58,40 @@ npx expo start
 - Export functionality
 - Theme customization
 - Additional mood customization options
+
+## TODO
+
+### High Priority
+- [x] Implement data persistence using AsyncStorage
+- [ ] Add year selection/navigation
+- [ ] Add month view mode
+- [ ] Implement data backup/restore functionality
+- [ ] Add haptic feedback for interactions
+
+### UI/UX Improvements
+- [ ] Add dark mode support
+- [ ] Implement custom color themes
+- [ ] Add zoom gestures for grid navigation
+- [ ] Improve accessibility features
+- [ ] Add loading states and animations
+
+### Features
+- [ ] Add mood statistics and trends
+- [ ] Implement mood streaks
+- [ ] Add reminders/notifications
+- [ ] Enable data export (CSV/PDF)
+- [ ] Add presets for mood entries
+- [ ] Enable photo attachments to entries
+
+### Technical Debt
+- [ ] Add unit tests
+- [ ] Implement error boundaries
+- [ ] Add logging system
+- [ ] Optimize performance for large datasets
+
+### Future Considerations
+- [ ] Multi-language support
+- [ ] Cloud sync functionality
+- [ ] Social sharing features
+- [ ] Widget support
+- [ ] Apple Watch/WearOS companion app
