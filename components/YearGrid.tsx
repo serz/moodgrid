@@ -65,6 +65,14 @@ type DayData = {
 
 type Month = keyof typeof MONTH_DAYS;
 
+const getCurrentDate = () => {
+  const today = new Date();
+  return {
+    month: MONTHS[today.getMonth()] as Month,
+    day: today.getDate()
+  };
+};
+
 export function YearGrid() {
   const [selectedCell, setSelectedCell] = useState<{month: Month, day: number} | null>(null);
   const [moodData, setMoodData] = useState<{[key: string]: DayData}>({});
@@ -72,6 +80,9 @@ export function YearGrid() {
   const [currentNote, setCurrentNote] = useState('');
   const [selectedMood, setSelectedMood] = useState<MoodKey | null>(null);
   const keyboardHeight = useRef(new Animated.Value(0)).current;
+  const [animatingCell, setAnimatingCell] = useState<string | null>(null);
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const opacityAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     const keyboardWillShow = Keyboard.addListener(
@@ -121,6 +132,25 @@ export function YearGrid() {
     return placeholders[randomIndex];
   };
 
+  const triggerAnimation = (key: string) => {
+    setAnimatingCell(key);
+    scaleAnim.setValue(1);
+    opacityAnim.setValue(1);
+    
+    Animated.parallel([
+      Animated.timing(scaleAnim, {
+        toValue: 2,
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+      Animated.timing(opacityAnim, {
+        toValue: 0,
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+    ]).start(() => setAnimatingCell(null));
+  };
+
   const handleMoodSelect = (mood: MoodKey) => {
     if (selectedCell) {
       setSelectedMood(mood);
@@ -132,6 +162,7 @@ export function YearGrid() {
           note: currentNote 
         } 
       });
+      triggerAnimation(key);
     }
   };
 
@@ -161,10 +192,13 @@ export function YearGrid() {
     }
   };
 
-  // Update the pixel rendering to show indication of notes
   const renderPixel = (month: Month, dayIndex: number) => {
     const key = `${month}-${dayIndex + 1}`;
     const dayData = moodData[key];
+    const currentDate = getCurrentDate();
+    const isCurrentDay = month === currentDate.month && (dayIndex + 1) === currentDate.day;
+    const isAnimating = animatingCell === key;
+
     return (
       <Pressable 
         key={key}
@@ -174,10 +208,26 @@ export function YearGrid() {
           style={[
             styles.pixel,
             !isValidDay(month, dayIndex + 1) && styles.invalidPixel,
+            isCurrentDay && !dayData?.mood && { backgroundColor: '#E3F2FD' },
             dayData?.mood && { backgroundColor: MOODS[dayData.mood].color },
-            dayData?.note && styles.pixelWithNote
+            dayData?.note && styles.pixelWithNote,
           ]} 
-        />
+        >
+          {isAnimating && (
+            <Animated.Text 
+              style={[
+                styles.pixelEmoji,
+                {
+                  position: 'absolute',
+                  transform: [{ scale: scaleAnim }],
+                  opacity: opacityAnim,
+                }
+              ]}
+            >
+              {MOODS[dayData.mood].emoji}
+            </Animated.Text>
+          )}
+        </View>
       </Pressable>
     );
   };
@@ -233,6 +283,22 @@ export function YearGrid() {
         >
           <View style={styles.moodSelectorHeader}>
             <View style={styles.moodSelectorHandle} />
+            {!selectedMood && (
+              <Pressable 
+              onPress={() => {
+                if (selectedCell) {
+                  const key = `${selectedCell.month}-${selectedCell.day}`;
+                  const newMoodData = { ...moodData };
+                  delete newMoodData[key];
+                  setMoodData(newMoodData);
+                  handleClose();
+                }
+              }}
+              style={styles.resetButton}
+            >
+              <Ionicons name="refresh" size={24} color="#666" />
+            </Pressable>
+            )}
             {selectedMood && (
               <Pressable 
                 onPress={() => setSelectedMood(null)}
@@ -252,9 +318,11 @@ export function YearGrid() {
           {!selectedMood ? (
             // Step 1: Mood Selection
             <>
-              <ThemedText style={styles.moodTitle}>
-                How was your day on {selectedCell?.month} {selectedCell?.day}?
-              </ThemedText>
+              <View style={styles.moodTitleContainer}>
+                <ThemedText style={styles.moodTitle}>
+                  How was your day on {selectedCell?.month} {selectedCell?.day}?
+                </ThemedText>
+              </View>
               <View style={styles.moodOptions}>
                 {Object.entries(MOODS).map(([key, { label, color, emoji }]) => (
                   <Pressable
@@ -329,6 +397,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#eee',
     borderWidth: 1,
     borderColor: '#ddd',
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'visible',  // Allow emoji to animate outside the cell
   },
   invalidPixel: {
     backgroundColor: '#fff',
@@ -363,6 +434,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 15,
     textAlign: 'center',
+    flex: 1,
   },
   moodOptions: {
     flexDirection: 'column',
@@ -422,4 +494,20 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 16,
   },
-}); 
+  moodTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+    marginBottom: 15,
+  },
+  resetButton: {
+    position: 'absolute',
+    left: 0,
+    top: -10,
+    padding: 10,
+  },
+  pixelEmoji: {
+    fontSize: 16,
+  },
+});
