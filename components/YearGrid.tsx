@@ -16,7 +16,7 @@ const MONTH_DAYS = {
   Jul: 31, Aug: 31, Sep: 30, Oct: 31, Nov: 30, Dec: 31
 };
 
-const isValidDay = (month: string, day: number) => {
+const isValidDay = (month: keyof typeof MONTH_DAYS, day: number) => {
   return day <= MONTH_DAYS[month];
 };
 
@@ -53,19 +53,23 @@ const MOOD_PLACEHOLDERS = {
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
+type MoodKey = keyof typeof MOODS;
+
 type DayData = {
-  mood: string;
+  mood: MoodKey;
   note: string;
 };
 
+type Month = keyof typeof MONTH_DAYS;
+
 export function YearGrid() {
-  const [selectedCell, setSelectedCell] = useState<{month: string, day: number} | null>(null);
+  const [selectedCell, setSelectedCell] = useState<{month: Month, day: number} | null>(null);
   const [moodData, setMoodData] = useState<{[key: string]: DayData}>({});
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
   const [currentNote, setCurrentNote] = useState('');
-  const [selectedMood, setSelectedMood] = useState<string | null>(null);
+  const [selectedMood, setSelectedMood] = useState<MoodKey | null>(null);
 
-  const handleCellPress = (month: string, day: number) => {
+  const handleCellPress = (month: Month, day: number) => {
     if (isValidDay(month, day)) {
       setSelectedCell({ month, day });
       const key = `${month}-${day}`;
@@ -78,13 +82,13 @@ export function YearGrid() {
     }
   };
 
-  const getRandomPlaceholder = (mood: string) => {
+  const getRandomPlaceholder = (mood: MoodKey) => {
     const placeholders = MOOD_PLACEHOLDERS[mood];
     const randomIndex = Math.floor(Math.random() * placeholders.length);
     return placeholders[randomIndex];
   };
 
-  const handleMoodSelect = (mood: string) => {
+  const handleMoodSelect = (mood: MoodKey) => {
     if (selectedCell) {
       setSelectedMood(mood);
       const key = `${selectedCell.month}-${selectedCell.day}`;
@@ -111,7 +115,7 @@ export function YearGrid() {
   };
 
   // Update the pixel rendering to show indication of notes
-  const renderPixel = (month: string, dayIndex: number) => {
+  const renderPixel = (month: Month, dayIndex: number) => {
     const key = `${month}-${dayIndex + 1}`;
     const dayData = moodData[key];
     return (
@@ -152,21 +156,7 @@ export function YearGrid() {
               {MONTHS.map((month) => {
                 const key = `${month}-${dayIndex + 1}`;
                 const dayData = moodData[key];
-                return (
-                  <Pressable 
-                    key={key}
-                    onPress={() => handleCellPress(month, dayIndex + 1)}
-                  >
-                    <View 
-                      style={[
-                        styles.pixel,
-                        !isValidDay(month, dayIndex + 1) && styles.invalidPixel,
-                        dayData?.mood && { backgroundColor: MOODS[dayData.mood].color },
-                        dayData?.note && styles.pixelWithNote
-                      ]} 
-                    />
-                  </Pressable>
-                );
+                return renderPixel(month as Month, dayIndex);
               })}
             </View>
           ))}
@@ -203,7 +193,7 @@ export function YearGrid() {
                 <Pressable
                   key={key}
                   style={[styles.moodButton, { backgroundColor: color }]}
-                  onPress={() => handleMoodSelect(key)}
+                  onPress={() => handleMoodSelect(key as MoodKey)}
                 >
                   <ThemedText style={styles.moodButtonText}>
                     {emoji}{'\n'}{label}

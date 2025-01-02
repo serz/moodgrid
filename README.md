@@ -1,4 +1,4 @@
-# Year in Pixels
+# VibeGrid
 
 A mood tracking app that helps you visualize your year through colors and reflections. Track your daily moods and add personal notes to capture the moments that shaped each day.
 

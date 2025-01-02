@@ -6,7 +6,7 @@ import { YearGrid } from '../../components/YearGrid';
 export default function App() {
   return (
     <SafeAreaView style={styles.container}>
-      <ThemedText style={styles.title}>Year in Pixels</ThemedText>
+      <ThemedText style={styles.title}>VibeGrid</ThemedText>
       <YearGrid />
       <StatusBar style="auto" />
     </SafeAreaView>
