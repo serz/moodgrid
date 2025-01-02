@@ -1,4 +1,4 @@
-# Mood Calendar App
+# MoodGrid
 
 A React Native application that helps users track their daily moods throughout the year in a visual calendar format.
 

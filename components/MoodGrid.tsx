@@ -73,7 +73,7 @@ const getCurrentDate = () => {
   };
 };
 
-export function YearGrid() {
+export function MoodGrid() {
   const [selectedCell, setSelectedCell] = useState<{month: Month, day: number} | null>(null);
   const [moodData, setMoodData] = useState<{[key: string]: DayData}>({});
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;

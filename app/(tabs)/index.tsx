@@ -1,13 +1,13 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, View, SafeAreaView } from 'react-native';
 import { ThemedText } from '../../components/ThemedText';
-import { YearGrid } from '../../components/YearGrid';
+import { MoodGrid } from '../../components/MoodGrid';
 
 export default function App() {
   return (
     <SafeAreaView style={styles.container}>
-      <ThemedText style={styles.title}>VibeGrid</ThemedText>
-      <YearGrid />
+      <ThemedText style={styles.title}>MoodGrid</ThemedText>
+      <MoodGrid />
       <StatusBar style="auto" />
     </SafeAreaView>
   );

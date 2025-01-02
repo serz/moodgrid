@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "VibeGrid",
-    "slug": "vibegrid",
+    "name": "MoodGrid",
+    "slug": "moodgrid",
     "version": "1.0.0",
     "orientation": "portrait",
     "scheme": "vibegrid",
@@ -15,7 +15,7 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "bundleIdentifier": "com.yourname.vibegrid",
+      "bundleIdentifier": "com.yourname.moodgrid",
       "buildNumber": "1.0.0",
       "supportsTablet": true
     },
