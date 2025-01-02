@@ -95,3 +95,37 @@ npx expo start
 - [ ] Social sharing features
 - [ ] Widget support
 - [ ] Apple Watch/WearOS companion app
+
+### Build and Submit
+
+```bash
+# Create production build
+eas build --platform ios --profile production
+
+# Submit to App Store
+eas submit --platform ios
+```
+
+### Required Assets
+1. App Icon (1024x1024px)
+2. Splash Screen
+3. Screenshots for different iPhone sizes
+4. App Privacy Policy URL
+5. App Description and Keywords
+
+### App Store Requirements
+1. Apple Developer Program membership ($99/year)
+2. App Store Connect account
+3. App Privacy Declarations
+4. Export Compliance Information
+5. Content Rights Documentation (if applicable)
+
+### Before Submission Checklist
+- [ ] Test app thoroughly on different devices
+- [ ] Prepare marketing materials
+- [ ] Write compelling app description
+- [ ] Create preview screenshots
+- [ ] Set up app privacy policy
+- [ ] Configure app pricing
+- [ ] Test in-app purchases (if any)
+- [ ] Prepare support contact information

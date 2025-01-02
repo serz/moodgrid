@@ -13,19 +13,27 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
-      "bundleIdentifier": "com.yourname.moodgrid",
+      "bundleIdentifier": "com.elusione.moodgrid",
       "buildNumber": "1.0.0",
       "supportsTablet": true
     },
     "android": {
-      "package": "com.yourname.vibegrid",
+      "package": "com.elusione.moodgrid",
       "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       }
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "21329015-bfb0-463b-8d5e-b6459d5a3baa"
+      }
+    },
+    "owner": "evolusione"
   }
 }
