@@ -1,81 +1,60 @@
-# VibeGrid
+# Mood Calendar App
 
-A mood tracking app that helps you visualize your year through colors and reflections. Track your daily moods and add personal notes to capture the moments that shaped each day.
+A React Native application that helps users track their daily moods throughout the year in a visual calendar format.
 
 ## Features
 
-### Mood Tracking
-- Visual yearly overview with a color-coded grid
-- Each day can be marked with one of five moods:
-  - 🤩 Great (Bright Green)
-  - 😊 Good (Light Green)
-  - 😐 Okay (Yellow)
-  - 😞 Bad (Light Red)
-  - 😢 Awful (Red)
+- Year-view calendar grid showing all months and days
+- Daily mood tracking with 5 different mood states:
+  - Great 🤩
+  - Good 😊
+  - Okay 😐
+  - Bad 😞
+  - Awful 😢
+- Add personal notes for each day
+- Visual indicators:
+  - Color-coded cells based on mood
+  - Current day highlighting
+  - Note indicators
+  - Smooth animations when selecting moods
+- Interactive UI:
+  - Slide-up mood selection panel
+  - Keyboard-aware note input
+  - Reset functionality for removing entries
+  - Back navigation between screens
 
-### Daily Notes
-- Add personal reflections for each day
-- Dynamic prompts based on selected mood
-- Visual indicator (thicker border) for days with notes
+## Technical Features
 
-### User Interface
-- Monthly rows and daily columns layout
-- Scrollable horizontal view for all days
-- Bottom sheet modal for mood selection and notes
-- Two-step input process:
-  1. Select mood
-  2. Add optional notes
+- Built with React Native and Expo
+- TypeScript for type safety
+- Animated transitions and effects
+- Responsive layout supporting different screen sizes
+- Platform-specific keyboard handling
+- Custom themed components
 
-## Technical Details
+## Getting Started
 
-### Built With
-- React Native
-- Expo
-- TypeScript
+1. Clone the repository
+2. Install dependencies:
+```bash
+npm install
+```
+3. Start the development server:
+```bash
+npx expo start
+```
+## Project Structure
 
-### Key Components
+- `/components`
+  - `YearGrid.tsx` - Main calendar grid component
+  - `ThemedText.tsx` - Themed text component
+- `/app`
+  - Navigation and screen components
 
-#### YearGrid
-Main component handling the visualization and interaction:
-- Grid layout with months and days
-- Mood selection interface
-- Notes input
-- Animation handling
+## Future Improvements
 
-### Data Structure
-
-## TODO
-
-### Features to Implement
-1. **Current Day Highlighting**
-   - Visual indicator for today's date in the grid
-   - Easy navigation to current day
-   - Different border or background style for current date
-
-2. **Mood Reset Functionality**
-   - Add ability to reset/remove mood from a day
-   - Option to clear both mood and notes
-   - Confirmation dialog for data removal
-
-3. **Notes Navigation**
-   - Add back button to return from notes to mood selection
-   - Preserve selected mood when returning
-   - Option to change mood without losing notes
-
-4. **Mood Selection Animation**
-   - Smooth transitions between mood states
-   - Visual feedback when selecting moods
-   - Animation for color changes in grid
-
-5. **Notes Management**
-   - Add Save button to confirm note entry
-   - Skip button to close without saving
-   - Auto-save functionality consideration
-   - Unsaved changes warning
-
-### Future Enhancements
 - Data persistence
-- Data export functionality
-- Monthly/yearly mood statistics
-- Customizable mood colors
-- Multiple years support
+- Statistics and mood trends
+- Export functionality
+- Theme customization
+- Additional mood customization options
