@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { View, StyleSheet, ScrollView, Pressable, Animated, Dimensions, TextInput } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, StyleSheet, ScrollView, Pressable, Animated, Dimensions, TextInput, Keyboard, KeyboardAvoidingView, Platform } from 'react-native';
 import { ThemedText } from './ThemedText';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -30,7 +30,8 @@ const MOODS = {
 
 const MOOD_PLACEHOLDERS = {
   GREAT: [
-    "What made your day amazing? Highlight the best moments!"
+    "What made your day amazing? Highlight the best moments!",
+    "Reflect on your day: what made it special, challenging, or insightful?"
   ],
   GOOD: [
     "What made your day good? Celebrate the wins!",
@@ -38,10 +39,12 @@ const MOOD_PLACEHOLDERS = {
     "What went well today? Who or what contributed to your happiness?"
   ],
   OKAY: [
-    "What was a quiet win today? Anything worth noting?"
+    "What was a quiet win today? Anything worth noting?",
+    "Reflect on your day: what made it special, challenging, or insightful?"
   ],
   BAD: [
-    "What made today challenging? It's okay to express it here."
+    "What made today challenging? It's okay to express it here.",
+    "Reflect on your day: what made it special, challenging, or insightful?"
   ],
   AWFUL: [
     "What made today tough? Writing can help process it.",
@@ -68,6 +71,36 @@ export function YearGrid() {
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
   const [currentNote, setCurrentNote] = useState('');
   const [selectedMood, setSelectedMood] = useState<MoodKey | null>(null);
+  const keyboardHeight = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const keyboardWillShow = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      (e) => {
+        Animated.timing(keyboardHeight, {
+          toValue: e.endCoordinates.height,
+          duration: 250,
+          useNativeDriver: true,
+        }).start();
+      }
+    );
+
+    const keyboardWillHide = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      () => {
+        Animated.timing(keyboardHeight, {
+          toValue: 0,
+          duration: 250,
+          useNativeDriver: true,
+        }).start();
+      }
+    );
+
+    return () => {
+      keyboardWillShow.remove();
+      keyboardWillHide.remove();
+    };
+  }, []);
 
   const handleCellPress = (month: Month, day: number) => {
     if (isValidDay(month, day)) {
@@ -112,6 +145,20 @@ export function YearGrid() {
       setCurrentNote('');
       setSelectedMood(null);
     });
+  };
+
+  const handleSave = () => {
+    if (selectedCell && selectedMood) {
+      const key = `${selectedCell.month}-${selectedCell.day}`;
+      setMoodData({
+        ...moodData,
+        [key]: {
+          mood: selectedMood,
+          note: currentNote
+        }
+      });
+      handleClose();
+    }
   };
 
   // Update the pixel rendering to show indication of notes
@@ -163,63 +210,90 @@ export function YearGrid() {
         </View>
       </ScrollView>
 
-      <Animated.View 
-        style={[styles.moodSelector, {
-          transform: [{ translateY: slideAnim }],
-          position: 'absolute',
-          left: 0,
-          right: 0,
-          bottom: 0,
-        }]}
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
-        <View style={styles.moodSelectorHeader}>
-          <View style={styles.moodSelectorHandle} />
-          <Pressable 
-            onPress={handleClose}
-            style={styles.closeButton}
-          >
-            <Ionicons name="close" size={24} color="#666" />
-          </Pressable>
-        </View>
+        <Animated.View 
+          style={[
+            styles.moodSelector, 
+            {
+              transform: [
+                { translateY: Animated.add(slideAnim, keyboardHeight.interpolate({
+                  inputRange: [0, 1000],
+                  outputRange: [0, -1000]
+                })) }
+              ],
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              bottom: 0,
+            }
+          ]}
+        >
+          <View style={styles.moodSelectorHeader}>
+            <View style={styles.moodSelectorHandle} />
+            {selectedMood && (
+              <Pressable 
+                onPress={() => setSelectedMood(null)}
+                style={styles.backButton}
+              >
+                <Ionicons name="arrow-back" size={24} color="#666" />
+              </Pressable>
+            )}
+            <Pressable 
+              onPress={handleClose}
+              style={styles.closeButton}
+            >
+              <Ionicons name="close" size={24} color="#666" />
+            </Pressable>
+          </View>
 
-        {!selectedMood ? (
-          // Step 1: Mood Selection
-          <>
-            <ThemedText style={styles.moodTitle}>
-              How was your day on {selectedCell?.month} {selectedCell?.day}?
-            </ThemedText>
-            <View style={styles.moodOptions}>
-              {Object.entries(MOODS).map(([key, { label, color, emoji }]) => (
-                <Pressable
-                  key={key}
-                  style={[styles.moodButton, { backgroundColor: color }]}
-                  onPress={() => handleMoodSelect(key as MoodKey)}
-                >
-                  <ThemedText style={styles.moodButtonText}>
-                    {emoji}{'\n'}{label}
-                  </ThemedText>
-                </Pressable>
-              ))}
-            </View>
-          </>
-        ) : (
-          // Step 2: Notes Input
-          <>
-            <ThemedText style={styles.moodTitle}>
-              Add notes for {selectedCell?.month} {selectedCell?.day}
-            </ThemedText>
-            <TextInput
-              style={styles.noteInput}
-              placeholder={selectedMood ? getRandomPlaceholder(selectedMood) : "Add notes for this day..."}
-              value={currentNote}
-              onChangeText={setCurrentNote}
-              multiline
-              numberOfLines={3}
-              textAlignVertical="top"
-            />
-          </>
-        )}
-      </Animated.View>
+          {!selectedMood ? (
+            // Step 1: Mood Selection
+            <>
+              <ThemedText style={styles.moodTitle}>
+                How was your day on {selectedCell?.month} {selectedCell?.day}?
+              </ThemedText>
+              <View style={styles.moodOptions}>
+                {Object.entries(MOODS).map(([key, { label, color, emoji }]) => (
+                  <Pressable
+                    key={key}
+                    style={[styles.moodButton, { backgroundColor: color }]}
+                    onPress={() => handleMoodSelect(key as MoodKey)}
+                  >
+                    <ThemedText style={styles.moodButtonText}>
+                      {emoji}{'\n'}{label}
+                    </ThemedText>
+                  </Pressable>
+                ))}
+              </View>
+            </>
+          ) : (
+            // Step 2: Notes Input
+            <>
+              <ThemedText style={styles.moodTitle}>
+                Add notes for {selectedCell?.month} {selectedCell?.day}
+              </ThemedText>
+              <TextInput
+                style={styles.noteInput}
+                placeholder={selectedMood ? getRandomPlaceholder(selectedMood) : "Add notes for this day..."}
+                value={currentNote}
+                onChangeText={setCurrentNote}
+                multiline
+                numberOfLines={3}
+                textAlignVertical="top"
+              />
+              <Pressable 
+                style={styles.saveButton}
+                onPress={handleSave}
+              >
+                <ThemedText style={styles.saveButtonText}>Save</ThemedText>
+              </Pressable>
+            </>
+          )}
+        </Animated.View>
+      </KeyboardAvoidingView>
     </View>
   );
 }
@@ -262,6 +336,7 @@ const styles = StyleSheet.create({
   },
   moodSelector: {
     padding: 20,
+    paddingBottom: 40,
     backgroundColor: '#fff',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
@@ -328,5 +403,23 @@ const styles = StyleSheet.create({
     right: 0,
     top: -10,
     padding: 10,
+  },
+  backButton: {
+    position: 'absolute',
+    left: 0,
+    top: -10,
+    padding: 10,
+  },
+  saveButton: {
+    backgroundColor: '#007AFF',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 12,
+  },
+  saveButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 16,
   },
 }); 
