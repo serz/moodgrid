@@ -368,7 +368,7 @@ export function MoodGrid() {
         >
           <View style={styles.moodSelectorHeader}>
             <View style={styles.moodSelectorHandle} />
-            {!selectedMood && (
+            {!selectedMood && selectedCell && moodData[`${selectedCell.month}-${selectedCell.day}`]?.mood && (
               <Pressable 
                 onPress={async () => {
                   if (selectedCell) {

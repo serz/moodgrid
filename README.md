@@ -66,7 +66,7 @@ npx expo start
 - [ ] Add year selection/navigation
 - [ ] Add month view mode
 - [ ] Implement data backup/restore functionality
-- [ ] Add haptic feedback for interactions
+- [x] Add haptic feedback for interactions
 
 ### UI/UX Improvements
 - [ ] Add dark mode support
