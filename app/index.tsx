@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, View, SafeAreaView } from 'react-native';
-import { ThemedText } from '../../components/ThemedText';
-import { MoodGrid } from '../../components/MoodGrid';
+import { ThemedText } from '../components/ThemedText';
+import { MoodGrid } from '../components/MoodGrid';
 
 export default function App() {
   return (
