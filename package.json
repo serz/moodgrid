@@ -1,6 +1,6 @@
 {
   "name": "mood",
-  "main": "expo-router/entry",
+  "main": "App.tsx",
   "version": "1.0.0",
   "scripts": {
     "start": "expo start",
@@ -9,7 +9,8 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "test": "jest --watchAll",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "build:web": "expo export:web"
   },
   "jest": {
     "preset": "jest-expo"

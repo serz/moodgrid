@@ -34,6 +34,10 @@
         "projectId": "21329015-bfb0-463b-8d5e-b6459d5a3baa"
       }
     },
-    "owner": "evolusione"
+    "owner": "evolusione",
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "webpack"
+    }
   }
 }
