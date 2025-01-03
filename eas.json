@@ -19,7 +19,7 @@
     "production": {
       "ios": {
         "appleId": "sergei.kalinistov@gmail.com",
-        "ascAppId": "your-app-store-connect-app-id",
+        "ascAppId": "JPTV46PJ4S",
         "appleTeamId": "your-team-id"
       }
     }
