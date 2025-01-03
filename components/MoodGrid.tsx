@@ -85,6 +85,9 @@ export function MoodGrid() {
   const [animatingCell, setAnimatingCell] = useState<string | null>(null);
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const opacityAnim = useRef(new Animated.Value(1)).current;
+  const [animatingSave, setAnimatingSave] = useState<string | null>(null);
+  const saveScaleAnim = useRef(new Animated.Value(1)).current;
+  const saveOpacityAnim = useRef(new Animated.Value(1)).current;
 
   const hapticFeedback = {
     light: () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light),
@@ -183,6 +186,25 @@ export function MoodGrid() {
     ]).start(() => setAnimatingCell(null));
   };
 
+  const triggerSaveAnimation = (key: string) => {
+    setAnimatingSave(key);
+    saveScaleAnim.setValue(1);
+    saveOpacityAnim.setValue(1);
+    
+    Animated.parallel([
+      Animated.timing(saveScaleAnim, {
+        toValue: 2,
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+      Animated.timing(saveOpacityAnim, {
+        toValue: 0,
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+    ]).start(() => setAnimatingSave(null));
+  };
+
   const handleMoodSelect = async (mood: MoodKey) => {
     if (selectedCell) {
       await hapticFeedback.medium();
@@ -226,6 +248,7 @@ export function MoodGrid() {
       };
       setMoodData(newMoodData);
       saveMoodData(newMoodData);
+      triggerSaveAnimation(key);
       handleClose();
     }
   };
@@ -244,6 +267,7 @@ export function MoodGrid() {
     const currentDate = getCurrentDate();
     const isCurrentDay = month === currentDate.month && (dayIndex + 1) === currentDate.day;
     const isAnimating = animatingCell === key;
+    const isSaveAnimating = animatingSave === key;
 
     return (
       <Pressable 
@@ -254,6 +278,7 @@ export function MoodGrid() {
           style={[
             styles.pixel,
             !isValidDay(month, dayIndex + 1) && styles.invalidPixel,
+            isCurrentDay && styles.currentDayPixel,
             isCurrentDay && !dayData?.mood && { backgroundColor: '#E3F2FD' },
             dayData?.mood && { backgroundColor: MOODS[dayData.mood].color },
             dayData?.note && styles.pixelWithNote,
@@ -271,6 +296,20 @@ export function MoodGrid() {
               ]}
             >
               {MOODS[dayData.mood].emoji}
+            </Animated.Text>
+          )}
+          {isSaveAnimating && (
+            <Animated.Text 
+              style={[
+                styles.pixelEmoji,
+                {
+                  position: 'absolute',
+                  transform: [{ scale: saveScaleAnim }],
+                  opacity: saveOpacityAnim,
+                }
+              ]}
+            >
+              ✅
             </Animated.Text>
           )}
         </View>
