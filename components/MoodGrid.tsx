@@ -3,6 +3,7 @@ import { View, StyleSheet, ScrollView, Pressable, Animated, Dimensions, TextInpu
 import { ThemedText } from './ThemedText';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Haptics from 'expo-haptics';
 
 const MONTHS = [
   'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
@@ -85,6 +86,12 @@ export function MoodGrid() {
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const opacityAnim = useRef(new Animated.Value(1)).current;
 
+  const hapticFeedback = {
+    light: () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light),
+    medium: () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium),
+    success: () => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success),
+  };
+
   useEffect(() => {
     const keyboardWillShow = Keyboard.addListener(
       Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
@@ -137,8 +144,9 @@ export function MoodGrid() {
     }
   };
 
-  const handleCellPress = (month: Month, day: number) => {
+  const handleCellPress = async (month: Month, day: number) => {
     if (isValidDay(month, day)) {
+      await hapticFeedback.light();
       setSelectedCell({ month, day });
       const key = `${month}-${day}`;
       setCurrentNote(moodData[key]?.note || '');
@@ -175,8 +183,9 @@ export function MoodGrid() {
     ]).start(() => setAnimatingCell(null));
   };
 
-  const handleMoodSelect = (mood: MoodKey) => {
+  const handleMoodSelect = async (mood: MoodKey) => {
     if (selectedCell) {
+      await hapticFeedback.medium();
       setSelectedMood(mood);
       const key = `${selectedCell.month}-${selectedCell.day}`;
       const newMoodData = { 
@@ -204,8 +213,9 @@ export function MoodGrid() {
     });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (selectedCell && selectedMood) {
+      await hapticFeedback.success();
       const key = `${selectedCell.month}-${selectedCell.day}`;
       const newMoodData = {
         ...moodData,
